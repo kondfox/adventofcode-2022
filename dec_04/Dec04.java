@@ -3,7 +3,7 @@ package dec_04;
 import utils.FileIO;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.function.BiPredicate;
 
 public class Dec04 {
 
@@ -13,35 +13,25 @@ public class Dec04 {
   }
 
   public static long countFullOverlaps(String filePath) {
-    List<String> fileContent = FileIO.readFile(filePath);
-    long fullOverlaps = fileContent.parallelStream()
-            .filter(Dec04::isFullyOverlapping)
-            .count();
-    return fullOverlaps;
+    return countOverlaps(filePath, Dec04::isFullyOverlapping);
   }
 
   public static long countOverlaps(String filePath) {
-    List<String> fileContent = FileIO.readFile(filePath);
-    long fullOverlaps = fileContent.parallelStream()
-            .filter(Dec04::isOverlapping)
+    return countOverlaps(filePath, Dec04::isOverlapping);
+  }
+
+  public static long countOverlaps(String filePath, BiPredicate<int[], int[]> strategy) {
+    return FileIO.readFile(filePath).parallelStream()
+            .filter(row -> isOverlapping(row, strategy))
             .count();
-    return fullOverlaps;
   }
 
-  public static boolean isFullyOverlapping(String line) {
-    String[] ranges = line.split(",");
-    int[] range1 = toIntArray(ranges[0].split("-"));
-    int[] range2 = toIntArray(ranges[1].split("-"));
-    boolean isOverlapping = isFullyOverlapping(range1, range2) || isFullyOverlapping(range2, range1);
-    return isOverlapping;
-  }
-
-  public static boolean isOverlapping(String line) {
+  public static boolean isOverlapping(String line, BiPredicate<int[], int[]> strategy) {
     String[] ranges = line.split(",");
     int[] range1 = toIntArray(ranges[0].split("-"));
     int[] range2 = toIntArray(ranges[1].split("-"));
     int[][] orderedRanges = orderRanges(range1, range2);
-    boolean isOverlapping = isOverlapping(orderedRanges[0], orderedRanges[1]);
+    boolean isOverlapping = strategy.test(orderedRanges[0], orderedRanges[1]);
     return isOverlapping;
   }
 
