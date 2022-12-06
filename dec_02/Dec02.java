@@ -2,9 +2,7 @@ package dec_02;
 
 import utils.FileIO;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.function.Function;
 
 public class Dec02 {
 
@@ -14,62 +12,54 @@ public class Dec02 {
   }
 
   public static long firstStrategyTotalScore(String filePath) {
-    List<String> fileContent = FileIO.readFile(filePath);
-    long totalScore = fileContent.parallelStream()
-            .mapToLong(Dec02::firstStrategyMatchScore)
-            .sum();
-    return totalScore;
+    return totalScore(filePath, Dec02::firstStrategyMatchScore);
   }
 
   public static long secondStrategyTotalScore(String filePath) {
-    List<String> fileContent = FileIO.readFile(filePath);
-    long totalScore = fileContent.parallelStream()
-            .mapToLong(Dec02::secondStrategyMatchScore)
+    return totalScore(filePath, Dec02::secondStrategyMatchScore);
+  }
+
+  public static long totalScore(String filePath, Function<String[], Integer> strategy) {
+    return FileIO.readFile(filePath).parallelStream()
+            .map(s -> s.split(" "))
+            .mapToInt(strategy::apply)
             .sum();
-    return totalScore;
   }
 
-  private static int firstStrategyMatchScore(String line) {
-    String[] choices = line.split(" ");
-    int choiceScore = findChoiceScore(choices[1]);
-    int battleScore = firstStrategyBattleScore(choices);
-    return choiceScore + battleScore;
+  private static int firstStrategyMatchScore(String[] choices) {
+    return matchScore(choices, choices[1]);
   }
 
-  private static int secondStrategyMatchScore(String line) {
-    String[] choices = line.split(" ");
+  private static int secondStrategyMatchScore(String[] choices) {
     String myChoice = decideMyChoice(choices);
-    int choiceScore = findChoiceScore(myChoice);
-    int battleScore = firstStrategyBattleScore(new String[] { choices[0], myChoice});
+    return matchScore(choices, myChoice);
+  }
+
+  private static int matchScore(String[] choices, String myChoice) {
+    int choiceScore = choiceScore(myChoice);
+    int battleScore = battleScore(choices);
     return choiceScore + battleScore;
   }
 
   public static String decideMyChoice(String[] choices) {
-    int opponentChoice = choices[0].charAt(0) - 65;
+    int opponentChoice = choices[0].charAt(0) - 'A';
     if (choices[1].equals("X")) {
-      return String.valueOf((char)(((opponentChoice + 2) % 3) + 88));
+      return String.valueOf((char)(((opponentChoice + 2) % 3) + 'X'));
     } else if (choices[1].equals("Y")) {
       return choices[0];
     } else {
-      return String.valueOf((char)(((opponentChoice + 1) % 3) + 88));
+      return String.valueOf((char)(((opponentChoice + 1) % 3) + 'X'));
     }
   }
 
-  private static int findChoiceScore(String choice) {
-    Map<String, Integer> choiceScores = new HashMap<String, Integer>() {{
-      put("A", 1);
-      put("B", 2);
-      put("C", 3);
-      put("X", 1);
-      put("Y", 2);
-      put("Z", 3);
-    }};
-    return choiceScores.get(choice);
+  private static int choiceScore(String choice) {
+    char c = choice.charAt(0);
+    return c - (c < 'X' ? 'A' : 'X') + 1;
   }
 
-  public static int firstStrategyBattleScore(String[] choices) {
-    int opponentScore = findChoiceScore(choices[0]);
-    int myScore = findChoiceScore(choices[1]);
+  public static int battleScore(String[] choices) {
+    int opponentScore = choiceScore(choices[0]);
+    int myScore = choiceScore(choices[1]);
     int diff = myScore - opponentScore;
     if (diff == 1 || diff == -2) {
       return 6;
