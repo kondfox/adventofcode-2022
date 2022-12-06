@@ -40,36 +40,63 @@ class Dec05Test {
   }
 
   @Test
-  void executeMoves_should_makeExpectedChangesInStacks_when_sampleInputIsGiven() {
+  void executeMove_should_makeExpectedChangesInStacks_when_1CrateIsMoved() {
     List<Deque<String>> expected = new ArrayList<>(Arrays.asList(
-            new LinkedList<>(Arrays.asList("C")),
-            new LinkedList<>(Arrays.asList("M")),
-            new LinkedList<>(Arrays.asList("Z", "N", "D", "P"))
+            new LinkedList<>(Arrays.asList("D", "N", "Z")),
+            new LinkedList<>(Arrays.asList("C", "M")),
+            new LinkedList<>(Arrays.asList("P"))
     ));
     List<Deque<String>> stacks = sampleStacks();
+    Move move = new Move(1, 2, 1);
 
-    Dec05.executeMoves(stacks, sampleFileContent);
+    Dec05.executeMove(stacks, move);
 
     assertIterableEquals(expected, stacks);
   }
 
   @Test
-  void executeMassMoves_should_makeExpectedChangesInStacks_when_sampleInputIsGiven() {
+  void executeMove_should_makeExpectedChangesInStacks_when_2CratesAreMoved() {
     List<Deque<String>> expected = new ArrayList<>(Arrays.asList(
+            new LinkedList<>(Arrays.asList("C", "D", "N", "Z")),
             new LinkedList<>(Arrays.asList("M")),
-            new LinkedList<>(Arrays.asList("C")),
-            new LinkedList<>(Arrays.asList("D", "N", "Z", "P"))
+            new LinkedList<>(Arrays.asList("P"))
     ));
     List<Deque<String>> stacks = sampleStacks();
+    Move move = new Move(2, 2, 1);
 
-    Dec05.executeMassMoves(stacks, sampleFileContent);
+    Dec05.executeMove(stacks, move);
 
     assertIterableEquals(expected, stacks);
   }
 
   @Test
-  void findStackAmount_should_return_3_when_sampleInputIsGiven() {
-    assertEquals(3, Dec05.findStackAmount(sampleFileContent));
+  void executeMassMove_should_makeExpectedChangesInStacks_when_1CrateIsMoved() {
+    List<Deque<String>> expected = new ArrayList<>(Arrays.asList(
+            new LinkedList<>(Arrays.asList("D", "N", "Z")),
+            new LinkedList<>(Arrays.asList("C", "M")),
+            new LinkedList<>(Arrays.asList("P"))
+    ));
+    List<Deque<String>> stacks = sampleStacks();
+    Move move = new Move(1, 2, 1);
+
+    Dec05.executeMassMove(stacks, move);
+
+    assertIterableEquals(expected, stacks);
+  }
+
+  @Test
+  void executeMassMove_should_makeExpectedChangesInStacks_when_2CratesAreMoved() {
+    List<Deque<String>> expected = new ArrayList<>(Arrays.asList(
+            new LinkedList<>(Arrays.asList("D", "C", "N", "Z")),
+            new LinkedList<>(Arrays.asList("M")),
+            new LinkedList<>(Arrays.asList("P"))
+    ));
+    List<Deque<String>> stacks = sampleStacks();
+    Move move = new Move(2, 2, 1);
+
+    Dec05.executeMassMove(stacks, move);
+
+    assertIterableEquals(expected, stacks);
   }
 
   private List<Deque<String>> sampleStacks() {

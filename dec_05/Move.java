@@ -6,10 +6,14 @@ public class Move {
   int from;
   int to;
 
+  public Move(int amount, int from, int to) {
+    this.amount = amount;
+    this.from = from - 1;
+    this.to = to - 1;
+  }
+
   public Move(int[] moveParams) {
-    amount = moveParams[0];
-    from = moveParams[1] - 1;
-    to = moveParams[2] - 1;
+    this(moveParams[0], moveParams[1], moveParams[2]);
   }
 
   @Override
