@@ -11,6 +11,13 @@ public class Dec01 {
     System.out.println(sumFirstNHighestCalories("dec_01/input.txt", 3));
   }
 
+  private static Long sumFirstNHighestCalories(String filePath, int n) {
+    List<String> fileContent = FileIO.readFile(filePath);
+    PriorityQueue<Long> caloriesAtElves = countElfCalories(fileContent);
+    Long sum = sumFirstNHighestCalories(caloriesAtElves, n);
+    return sum;
+  }
+
   private static PriorityQueue<Long> countElfCalories(List<String> fileContent) {
     PriorityQueue<Long> caloriesAtElves = new PriorityQueue<>((a, b) -> (int) (b - a));
     long calories = 0;
@@ -23,13 +30,6 @@ public class Dec01 {
       }
     }
     return caloriesAtElves;
-  }
-
-  private static Long sumFirstNHighestCalories(String filePath, int n) {
-    List<String> fileContent = FileIO.readFile(filePath);
-    PriorityQueue<Long> caloriesAtElves = countElfCalories(fileContent);
-    Long sum = sumFirstNHighestCalories(caloriesAtElves, n);
-    return sum;
   }
 
   private static Long sumFirstNHighestCalories(PriorityQueue<Long> caloriesAtElves, int n) {
