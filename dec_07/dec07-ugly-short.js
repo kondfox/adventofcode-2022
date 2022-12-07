@@ -5,8 +5,9 @@ const dirSizes = {}
 
 const operations = {
   cdIn: dirName => dirStack.unshift(`/${dirName}${dirStack[0] || ''}`),
-  cdOut: () => dirSizes[dirStack[1]] += dirSizes[dirStack.shift()],
-  addSize: size => dirSizes[dirStack[0]] = dirSizes[dirStack[0]] + size || size,
+  cdOut: () => (dirSizes[dirStack[1]] += dirSizes[dirStack.shift()]),
+  addSize: size =>
+    (dirSizes[dirStack[0]] = dirSizes[dirStack[0]] + size || size),
 }
 
 const parse = ([p1, p2, p3]) => {
@@ -16,15 +17,21 @@ const parse = ([p1, p2, p3]) => {
 }
 
 const calculateDirSizes = filePath => {
-  readFileLines(filePath).map(line => line.split(' ')).forEach(parse)
+  readFileLines(filePath)
+    .map(line => line.split(' '))
+    .forEach(parse)
   while (dirStack.length > 1) operations.cdOut()
 }
 
-const q1 = m => Object.values(dirSizes).filter(s => s <= m).reduce((sum, s) => sum + s, 0)
+const q1 = m =>
+  Object.values(dirSizes)
+    .filter(s => s <= m)
+    .reduce((sum, s) => sum + s, 0)
 
-const q2 = (total, need) => Object.entries(dirSizes)
-  .sort((ds1, ds2) => ds1[1] - ds2[1])
-  .find(([_, size]) => size >= need - (total - dirSizes['//']))[1]
+const q2 = (total, need) =>
+  Object.entries(dirSizes)
+    .sort((ds1, ds2) => ds1[1] - ds2[1])
+    .find(([_, size]) => size >= need - (total - dirSizes['//']))[1]
 
 calculateDirSizes('dec_07/sample-input.txt')
 
