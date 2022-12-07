@@ -7,6 +7,21 @@ function sumOfSmallDirs(filePath) {
   return sumOfSmallDirs
 }
 
+function smallestDirToDelete(filePath, capacity, needed) {
+  const rows = readFile(filePath).split('\n')
+  const dirSizes = calculateDirSizes(rows)
+  const currentFree = capacity - dirSizes['/']
+  const required = needed - currentFree
+  const dirToDelete = findDirToDelete(dirSizes, required)
+  return dirSizes[dirToDelete]
+}
+
+function findDirToDelete(dirSizes, required) {
+  return Object.entries(dirSizes)
+    .sort((ds1, ds2) => ds1[1] - ds2[1])
+    .find(([_, size]) => size >= required)[0]
+}
+
 function calculateDirSizes(rows) {
   const dirStack = []
   const dirSizes = {}
@@ -51,5 +66,10 @@ function addRemainingDirSizes(dirSizes, dirStack) {
   }
 }
 
+// 1st part
 console.log(sumOfSmallDirs('dec_07/sample-input.txt'))
 console.log(sumOfSmallDirs('dec_07/input.txt'))
+
+// 2nd part
+console.log(smallestDirToDelete('dec_07/sample-input.txt', 70_000_000, 30_000_000))
+console.log(smallestDirToDelete('dec_07/input.txt', 70_000_000, 30_000_000))
