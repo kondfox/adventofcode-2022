@@ -5,6 +5,7 @@ const monkey = () => items => op => cond => case1 => case2 => ({
   op,
   test: n => (n % cond == 0 ? case1 : case2),
   inspects: 0,
+  cond,
 })
 
 const operation = {
@@ -14,7 +15,7 @@ const operation = {
 
 const parseOperation = ([_, o, v]) => operation[o](Number(v))
 
-function parseMonkeys(filePath) {
+function parseMonkeys(filePath, rounds, calmness) {
   const lines = readFileLines(filePath)
   const states = {
     skip: () => {},
@@ -38,14 +39,15 @@ function parseMonkeys(filePath) {
     }
     monkeys.push(m)
   }
-  for (let i = 0; i < 20; i++) {
+  const condProd = monkeys.reduce((p, m) => p * m.cond, 1)
+  for (let i = 0; i < rounds; i++) {
     for (let j = 0; j < monkeys.length; j++) {
       const m = monkeys[j]
       const itemCount = m.items.length
       m.inspects += itemCount
       for (let k = 0; k < itemCount; k++) {
         const item = m.items.shift()
-        const worry = Math.floor(m.op(item) / 3)
+        const worry = Math.floor(m.op(item) / calmness) % condProd
         const to = m.test(worry)
         monkeys[to].items.push(worry)
       }
@@ -58,5 +60,8 @@ function parseMonkeys(filePath) {
     .reduce((p, i) => p * i, 1)
 }
 
-console.log(parseMonkeys('dec_11/sample-input.txt'))
-console.log(parseMonkeys('dec_11/input.txt'))
+console.log(parseMonkeys('dec_11/sample-input.txt', 20, 3))
+console.log(parseMonkeys('dec_11/input.txt', 20, 3))
+
+console.log(parseMonkeys('dec_11/sample-input.txt', 10_000, 1))
+console.log(parseMonkeys('dec_11/input.txt', 10_000, 1))
