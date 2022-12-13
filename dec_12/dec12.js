@@ -8,9 +8,11 @@ const eq = (c1, c2) => c1[0] === c2[0] && c1[1] === c2[1]
 
 const createMap = m => {
   const find = t => {
-    const y = m.reduce((y, r, i) => (r.includes(t) ? i : y), -1)
-    const x = m[y].reduce((x, c, i) => (c === t ? i : x), -1)
-    return [y, x]
+    const coords = []
+    m.forEach((row, y) =>
+      row.forEach((col, x) => col === t && coords.push([y, x]))
+    )
+    return coords
   }
 
   const neighbours = ([y, x]) => {
@@ -23,27 +25,26 @@ const createMap = m => {
     return n
   }
 
-  const id = ([y, x]) => y * m[0].length + x
-  const coordFromId = id => [Math.floor(id / m[0].length), id % m[0].length]
-
-  const s = find('S')
-  const e = find('E')
+  const s = find('S')[0]
+  const e = find('E')[0]
   m[s[0]][s[1]] = 'a'
   m[e[0]][e[1]] = 'z'
 
-  return { h: m.length, w: m[0].length, coordFromId, neighbours, id, s, e }
+  return { h: m.length, w: m[0].length, neighbours, find, s, e }
 }
 
 function parseMap(filePath) {
   const content = readFileLines(filePath).map(r => r.split(''))
   const map = createMap(content)
-  const visits = bfs(map)
-  return visits[map.e[0]][map.e[1]].steps
+  return map.find('a').reduce((shortest, from) => {
+    const steps = bfs(map, from)[map.e[0]][map.e[1]].steps
+    return steps < shortest ? steps : shortest
+  }, Number.MAX_VALUE)
 }
 
 const visit = (from, to, steps) => ({ from, to, steps })
 
-function bfs(map) {
+function bfs(map, from) {
   const visits = new Array(map.h)
     .fill(0)
     .map((_, y) =>
@@ -51,7 +52,7 @@ function bfs(map) {
         .fill(0)
         .map((_, x) => visit(null, [y, x], Number.MAX_VALUE))
     )
-  const start = visits[map.s[0]][map.s[1]]
+  const start = visits[from[0]][from[1]]
   start.steps = 0
   const toVisit = [start]
   while (toVisit.length) {
