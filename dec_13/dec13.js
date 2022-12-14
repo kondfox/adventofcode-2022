@@ -2,8 +2,18 @@ import { readFileLines } from '../utils/fileIO.js'
 
 const asArray = n => (Array.isArray(n) ? n : [n])
 
-function parsePairs(filePath) {
-  const input = readFileLines(filePath).map(row => {
+function sumOfInOrderPairIndices(filePath) {
+  const input = parseInput(filePath)
+  let inOrder = 0
+  for (let i = 0, j = 1; i < input.length; i += 3, j++) {
+    const [arr1, arr2] = [input[i], input[i + 1]]
+    if (compareArrays(arr1, arr2)) inOrder += j
+  }
+  return inOrder
+}
+
+function parseInput(filePath) {
+  return readFileLines(filePath).map(row => {
     const stack = []
     for (let i = 0; i < row.length; i++) {
       let c = row[i]
@@ -23,13 +33,6 @@ function parsePairs(filePath) {
     }
     return stack[0]
   })
-
-  let inOrder = 0
-  for (let i = 0, j = 1; i < input.length; i += 3, j++) {
-    const [arr1, arr2] = [input[i], input[i + 1]]
-    if (compareArrays(arr1, arr2)) inOrder += j
-  }
-  return inOrder
 }
 
 function compareArrays(arr1, arr2) {
@@ -47,5 +50,5 @@ function compareArrays(arr1, arr2) {
   return undefined
 }
 
-console.log(parsePairs('dec_13/sample-input.txt'))
-console.log(parsePairs('dec_13/input.txt'))
+console.log(sumOfInOrderPairIndices('dec_13/sample-input.txt'))
+console.log(sumOfInOrderPairIndices('dec_13/input.txt'))
