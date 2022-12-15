@@ -2,14 +2,12 @@ import { readFileLines } from '../utils/fileIO.js'
 
 const source = [0, 500]
 
-const eq = (p1, p2) => p1[0] === p2[0] && p1[1] === p2[1]
-const find = (arr, p) => arr.find(e => eq(e, p))
 const down = p => [p[0] + 1, p[1]]
 const downLeft = p => [p[0] + 1, p[1] - 1]
 const downRight = p => [p[0] + 1, p[1] + 1]
-const bId = bound => p => p[0] * (bound.w + 1) + p[1] - bound.W
+const id = p => 10_000 * p[0] + p[1]
 
-function parsePaths(filePath) {
+function part1(filePath) {
   const paths = readFileLines(filePath).map(row =>
     row.split(' -> ').map(c => c.split(',').map(n => Number(n)))
   )
@@ -18,6 +16,17 @@ function parsePaths(filePath) {
   const sand = dropSand(walls, boundaries, source)
   // draw(walls, boundaries, sand)
   return sand.length
+}
+
+function part2(filePath) {
+  const paths = readFileLines(filePath).map(row =>
+    row.split(' -> ').map(c => c.split(',').map(n => Number(n)))
+  )
+  const boundaries = findBoundaries(paths)
+  const walls = findWalls(paths)
+  const sand = dropSand(walls, boundaries, source, boundaries.S + 1)
+  // draw(walls, boundaries, sand)
+  return sand.length + 1
 }
 
 function findWalls(paths) {
@@ -74,16 +83,15 @@ function findBoundaries(paths) {
   return b
 }
 
-function dropSand(walls, boundaries, source) {
+function dropSand(walls, boundaries, source, bottom) {
   const sand = []
   let s = [...source]
-  const id = bId(boundaries)
   const obstacles = new Set([...walls.map(w => id(w))])
-  while (s[0] < boundaries.S && !isRest(s, obstacles, id)) {
+  while (!isRest([...source], obstacles, bottom)) {
     if (!obstacles.has(id(down(s)))) s = down(s)
     else if (!obstacles.has(id(downLeft(s)))) s = downLeft(s)
     else s = downRight(s)
-    if (isRest(s, obstacles, id)) {
+    if (isRest(s, obstacles, bottom)) {
       sand.push(s)
       obstacles.add(id(s))
       s = [...source]
@@ -92,21 +100,21 @@ function dropSand(walls, boundaries, source) {
   return sand
 }
 
-function isRest(p, obs, id) {
+function isRest(p, obs, bottom) {
   return (
-    obs.has(id(down(p))) &&
-    obs.has(id(downLeft(p))) &&
-    obs.has(id(downRight(p)))
+    p[0] === bottom ||
+    (obs.has(id(down(p))) &&
+      obs.has(id(downLeft(p))) &&
+      obs.has(id(downRight(p))))
   )
 }
 
 function draw(walls, b, sand) {
-  const id = bId(b)
   const wallIds = new Set(walls.map(w => id(w)))
   const sandIds = new Set(sand.map(s => id(s)))
-  for (let y = 0; y <= b.S; y++) {
+  for (let y = 0; y <= b.S + 1; y++) {
     let row = ''
-    for (let x = 0; x <= b.w; x++) {
+    for (let x = -10; x <= b.w + 10; x++) {
       if (wallIds.has(id([y, x + b.W]))) {
         row += '#'
       } else if (sandIds.has(id([y, x + b.W]))) {
@@ -119,5 +127,8 @@ function draw(walls, b, sand) {
   }
 }
 
-console.log(parsePaths('dec_14/sample-input.txt'))
-console.log(parsePaths('dec_14/input.txt'))
+// console.log(part1('dec_14/sample-input.txt'))
+// console.log(part1('dec_14/input.txt'))
+
+console.log(part2('dec_14/sample-input.txt'))
+console.log(part2('dec_14/input.txt'))
