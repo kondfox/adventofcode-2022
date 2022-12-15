@@ -7,6 +7,7 @@ const find = (arr, p) => arr.find(e => eq(e, p))
 const down = p => [p[0] + 1, p[1]]
 const downLeft = p => [p[0] + 1, p[1] - 1]
 const downRight = p => [p[0] + 1, p[1] + 1]
+const bId = bound => p => p[0] * (bound.w + 1) + p[1] - bound.W
 
 function parsePaths(filePath) {
   const paths = readFileLines(filePath).map(row =>
@@ -76,31 +77,39 @@ function findBoundaries(paths) {
 function dropSand(walls, boundaries, source) {
   const sand = []
   let s = [...source]
-  const obstacles = [...walls]
-  while (s[0] < boundaries.S && !isRest(s, obstacles)) {
-    if (!find(obstacles, down(s))) s = down(s)
-    else if (!find(obstacles, downLeft(s))) s = downLeft(s)
+  const id = bId(boundaries)
+  const obstacles = new Set([...walls.map(w => id(w))])
+  while (s[0] < boundaries.S && !isRest(s, obstacles, id)) {
+    if (!obstacles.has(id(down(s)))) s = down(s)
+    else if (!obstacles.has(id(downLeft(s)))) s = downLeft(s)
     else s = downRight(s)
-    if (isRest(s, obstacles)) {
+    if (isRest(s, obstacles, id)) {
       sand.push(s)
-      obstacles.push(s)
+      obstacles.add(id(s))
       s = [...source]
     }
   }
   return sand
 }
 
-function isRest(p, obs) {
-  return find(obs, down(p)) && find(obs, downLeft(p)) && find(obs, downRight(p))
+function isRest(p, obs, id) {
+  return (
+    obs.has(id(down(p))) &&
+    obs.has(id(downLeft(p))) &&
+    obs.has(id(downRight(p)))
+  )
 }
 
 function draw(walls, b, sand) {
+  const id = bId(b)
+  const wallIds = new Set(walls.map(w => id(w)))
+  const sandIds = new Set(sand.map(s => id(s)))
   for (let y = 0; y <= b.S; y++) {
     let row = ''
     for (let x = 0; x <= b.w; x++) {
-      if (find(walls, [y, x + b.W])) {
+      if (wallIds.has(id([y, x + b.W]))) {
         row += '#'
-      } else if (find(sand, [y, x + b.W])) {
+      } else if (sandIds.has(id([y, x + b.W]))) {
         row += 'o'
       } else {
         row += '.'
